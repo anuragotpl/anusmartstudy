@@ -1,0 +1,8 @@
+flask
+flask-login
+flask-sqlalchemy
+PyPDF2
+scikit-learn
+faiss-cpu
+groq
+gunicorn

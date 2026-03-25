@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>AnuAI Pro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app">
+
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo">🤖 AnuAI</div>
+
+    <button class="new-chat" onclick="newChat()">+ New Chat</button>
+<button id="micBtn">🎤</button>
+    <select id="mode">
+        <option value="normal">💬 Chat</option>
+        <option value="rag">📄 PDF</option>
+        <option value="image">🎨 Image</option>
+    </select>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+
+    <div class="bottom">
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<!-- Chat -->
+<div class="chat">
+
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="input-box">
+        <input id="msg" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') send()">
+        <button onclick="send()">➤</button>
+    </div>
+
+</div>
+
+
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

@@ -16,10 +16,25 @@ return div;
 
 }
 
+function typeEffect(text) {
+    let chat = document.getElementById("chat");
+    let div = document.createElement("div");
+    div.className = "message bot";
+    chat.appendChild(div);
+
+    let i = 0;
+    let interval = setInterval(() => {
+        div.innerText += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+        chat.scrollTop = chat.scrollHeight;
+    }, 20);
+}
 // typing dots
 function showLoader() {
 return addMessage("...", "bot");
 }
+
 
 function send() {
 let input = document.getElementById("msg");
@@ -30,7 +45,8 @@ let msg = input.value;
 
 if (!msg) return;
 
-addMessage(msg, "user");
+//addMessage(msg, "user");
+typeEffect(data.reply);
 input.value = "";
 
 currentBotMsg = showLoader();

@@ -1,53 +1,144 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head>
-    <title>AnuAI Pro</title>
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="UTF-8">
+<title>Anu AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #343541;
+    color: white;
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #202123;
+    height: 100vh;
+    padding: 15px;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 10px;
+    background: #444654;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+/* Chat Area */
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Messages */
+.message {
+    max-width: 70%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+.user {
+    background: #0b93f6;
+    align-self: flex-end;
+}
+
+.bot {
+    background: #444654;
+    align-self: flex-start;
+}
+
+/* Input */
+.input-box {
+    display: flex;
+    padding: 10px;
+    background: #40414f;
+}
+
+.input-box input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+.input-box button {
+    padding: 10px 15px;
+    border: none;
+    background: #19c37d;
+    color: white;
+    cursor: pointer;
+}
+</style>
+
 </head>
+
 <body>
 
-<div class="app">
-
-
-<!-- Sidebar -->
 <div class="sidebar">
-    <div class="logo">🤖 AnuAI</div>
-
-    <button class="new-chat" onclick="newChat()">+ New Chat</button>
-<button id="micBtn">🎤</button>
-    <select id="mode">
-        <option value="normal">💬 Chat</option>
-        <option value="rag">📄 PDF</option>
-        <option value="image">🎨 Image</option>
-    </select>
-
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Upload</button>
-    </form>
-
-    <div class="bottom">
-        <a href="/logout">Logout</a>
-    </div>
+    <button onclick="newChat()">+ New Chat</button>
 </div>
 
-<!-- Chat -->
-<div class="chat">
+<div class="chat-container">
+    <div class="chat-box" id="chat"></div>
 
-    <div id="chat-box" class="chat-box"></div>
-
-    <div class="input-box">
-        <input id="msg" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') send()">
-        <button onclick="send()">➤</button>
-    </div>
+```
+<div class="input-box">
+    <input type="text" id="msg" placeholder="Ask anything...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+```
 
 </div>
 
+<script>
+async function sendMessage() {
+    let input = document.getElementById("msg");
+    let message = input.value;
+    if (!message) return;
 
-</div>
+    addMessage(message, "user");
+    input.value = "";
 
-<script src="/static/script.js"></script>
+    let res = await fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: message})
+    });
+
+    let data = await res.json();
+    addMessage(data.reply, "bot");
+}
+
+function addMessage(text, type) {
+    let chat = document.getElementById("chat");
+    let div = document.createElement("div");
+    div.className = "message " + type;
+    div.innerText = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function newChat() {
+    document.getElementById("chat").innerHTML = "";
+}
+</script>
 
 </body>
 </html>

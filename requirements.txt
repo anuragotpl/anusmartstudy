@@ -6,3 +6,4 @@ scikit-learn
 faiss-cpu
 groq
 gunicorn
+requests

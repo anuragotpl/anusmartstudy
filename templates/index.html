@@ -1,259 +1,53 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Anu AI Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    display: flex;
-    height: 100vh;
-    background: #343541;
-    color: white;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 260px;
-    background: #202123;
-    padding: 10px;
-    overflow-y: auto;
-}
-
-.sidebar button {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    background: #444654;
-    border: none;
-    color: white;
-    cursor: pointer;
-}
-
-/* Chat */
-.chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-box {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-/* Messages */
-.message {
-    padding: 10px;
-    margin: 10px;
-    border-radius: 10px;
-    max-width: 70%;
-    animation: fadeIn 0.3s ease;
-}
-
-.user {
-    background: #0b93f6;
-    margin-left: auto;
-}
-
-.bot {
-    background: #444654;
-}
-
-/* Input */
-.input-box {
-    display: flex;
-    padding: 10px;
-    background: #40414f;
-    gap: 5px;
-}
-
-input {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    outline: none;
-}
-
-button {
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-}
-
-.send { background: #19c37d; }
-.voice { background: orange; }
-.upload { background: purple; }
-
-/* Drag Drop */
-.drop-area {
-    border: 2px dashed #aaa;
-    padding: 20px;
-    text-align: center;
-    margin: 10px;
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1;}
-}
-</style>
-
+    <title>AnuAI Pro</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
+<div class="app">
+
+
+<!-- Sidebar -->
 <div class="sidebar">
-    <button onclick="newChat()">+ New Chat</button>
-    <div id="history"></div>
+    <div class="logo">🤖 AnuAI</div>
+
+    <button class="new-chat" onclick="newChat()">+ New Chat</button>
+<button id="micBtn">🎤</button>
+    <select id="mode">
+        <option value="normal">💬 Chat</option>
+        <option value="rag">📄 PDF</option>
+        <option value="image">🎨 Image</option>
+    </select>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+
+    <div class="bottom">
+        <a href="/logout">Logout</a>
+    </div>
 </div>
 
-<div class="chat-container">
+<!-- Chat -->
+<div class="chat">
 
-```
-<div class="drop-area" id="drop">
-    Drag & Drop PDF Here
-</div>
+    <div id="chat-box" class="chat-box"></div>
 
-<div class="chat-box" id="chat"></div>
-
-<div class="input-box">
-    <input type="text" id="msg" placeholder="Ask anything...">
-    <button class="voice" onclick="startVoice()">🎤</button>
-    <button class="upload" onclick="uploadPDF()">📄</button>
-    <button class="send" onclick="sendMessage()">Send</button>
-</div>
-```
+    <div class="input-box">
+        <input id="msg" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') send()">
+        <button onclick="send()">➤</button>
+    </div>
 
 </div>
 
-<script>
-let historyList = [];
 
-async function sendMessage() {
-    let input = document.getElementById("msg");
-    let text = input.value;
-    if (!text) return;
+</div>
 
-    addMessage(text, "user");
-    saveHistory(text);
-    input.value = "";
-
-    let res = await fetch("/chat", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: text})
-    });
-
-    let data = await res.json();
-    typeEffect(data.reply);
-}
-
-function addMessage(text, type) {
-    let chat = document.getElementById("chat");
-    let div = document.createElement("div");
-    div.className = "message " + type;
-    div.innerText = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-}
-
-/* Typing Animation */
-function typeEffect(text) {
-    let chat = document.getElementById("chat");
-    let div = document.createElement("div");
-    div.className = "message bot";
-    chat.appendChild(div);
-
-    let i = 0;
-    let interval = setInterval(() => {
-        div.innerText += text[i];
-        i++;
-        if (i >= text.length) clearInterval(interval);
-        chat.scrollTop = chat.scrollHeight;
-    }, 15);
-}
-
-/* Voice */
-function startVoice() {
-    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.start();
-
-    recognition.onresult = function(e) {
-        document.getElementById("msg").value = e.results[0][0].transcript;
-    };
-}
-
-/* PDF Upload */
-function uploadPDF() {
-    let input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/pdf";
-
-    input.onchange = async function() {
-        let file = input.files[0];
-        let formData = new FormData();
-        formData.append("file", file);
-
-        await fetch("/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        alert("PDF Uploaded!");
-    };
-
-    input.click();
-}
-
-/* Drag & Drop */
-let drop = document.getElementById("drop");
-
-drop.ondragover = e => e.preventDefault();
-
-drop.ondrop = async e => {
-    e.preventDefault();
-    let file = e.dataTransfer.files[0];
-
-    let formData = new FormData();
-    formData.append("file", file);
-
-    await fetch("/upload", {
-        method: "POST",
-        body: formData
-    });
-
-    alert("PDF Uploaded!");
-};
-
-/* Chat History */
-function saveHistory(msg) {
-    historyList.push(msg);
-    renderHistory();
-}
-
-function renderHistory() {
-    let div = document.getElementById("history");
-    div.innerHTML = "";
-
-    historyList.forEach(h => {
-        let btn = document.createElement("button");
-        btn.innerText = h;
-        btn.onclick = () => addMessage(h, "user");
-        div.appendChild(btn);
-    });
-}
-
-function newChat() {
-    document.getElementById("chat").innerHTML = "";
-}
-</script>
+<script src="/static/script.js"></script>
 
 </body>
 </html>

@@ -59,30 +59,31 @@ fetch("/chat", {
         // mode: mode
     })
 })
-.then(res => res.json())
+.then(res => {
+    if (!res.ok) {
+        throw new Error("Not logged in or server error");
+    }
+    return res.json();
+})
 .then(data => {
 
-    // IMAGE MODE
+    if (data.error) {
+        window.location.href = "/login";
+        return;
+    }
+
     if (data.image) {
         currentBotMsg.innerHTML = `
-            <img src="${data.image}" 
-                 style="max-width:100%; border-radius:10px;">
+            <img src="${data.image}" style="max-width:100%">
         `;
         return;
     }
 
-    // TEXT MODE SAFE CHECK
-    if (data.answer && data.answer.length > 0) {
-       
-        if (data.image) {
-            currentBotMsg.innerHTML = `<img src="${data.image}" style="max-width:100%">`;
-            speak("Here is your generated image");
-        }
-         typeEffect(data.answer);
+    if (data.answer) {
+        typeEffect(data.answer);
         speak(data.answer);
-    }
-     else {
-        currentBotMsg.innerText = "⚠️ No response from AI";
+    } else {
+        currentBotMsg.innerText = "⚠️ No response";
     }
 
 })

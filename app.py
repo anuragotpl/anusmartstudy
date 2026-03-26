@@ -29,7 +29,14 @@ login_manager.login_view = "login"
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    return jsonify({"error": "Unauthorized"}), 401
+    from flask import request, redirect
+    
+    # Agar API call hai → JSON
+    if request.path.startswith("/chat") or request.path.startswith("/upload"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    # Normal page → login page
+    return redirect("/login")
 
 # folders
 os.makedirs("uploads", exist_ok=True)

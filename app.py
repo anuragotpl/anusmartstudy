@@ -60,7 +60,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route("/history")
-@login_required
+# @login_required
 def history():
     chats = Chat.query.filter_by(user_id=current_user.id).all()
 

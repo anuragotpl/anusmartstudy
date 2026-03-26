@@ -27,6 +27,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    return jsonify({"error": "Unauthorized"}), 401
+
 # folders
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("vectorstore", exist_ok=True)
